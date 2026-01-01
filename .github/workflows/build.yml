@@ -23,7 +23,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-  run: ./gradlew clean build jar
+        run: ./gradlew clean build jar
 
       - name: Upload mod jar
         uses: actions/upload-artifact@v4
