@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "livessystem",
+  "version": "1.0.0",
+  "name": "Lives System",
+  "description": "Lives and souls system mod",
+  "authors": ["Server Owner"],
+  "license": "MIT",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "com.example.livessystem.LivesSystemMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "1.21.x",
+    "fabric-api": "*"
+  }
+}
