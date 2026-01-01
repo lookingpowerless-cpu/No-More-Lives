@@ -26,7 +26,7 @@ public class LivesSystemMod implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        /* ===== PLAYER JOIN (1.21 compatible) ===== */
+        /* ===== PLAYER JOIN ===== */
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.player;
             UUID id = player.getUuid();
@@ -42,12 +42,7 @@ public class LivesSystemMod implements ModInitializer {
             }
 
             if (oldPlayer.get(id) && lives.get(id) <= 0) {
-                server.getPlayerManager().ban(
-                        player.getGameProfile(),
-                        "Out of lives",
-                        null,
-                        null
-                );
+                banPlayer(player, "Out of lives");
             }
         });
 
@@ -64,12 +59,7 @@ public class LivesSystemMod implements ModInitializer {
                     deathCount.put(id, 0);
 
                     if (newLives <= 0 && oldPlayer.getOrDefault(id, false)) {
-                        player.server.getPlayerManager().ban(
-                                player.getGameProfile(),
-                                "Out of lives",
-                                null,
-                                null
-                        );
+                        banPlayer(player, "Out of lives");
                     }
                 }
             }
@@ -104,12 +94,7 @@ public class LivesSystemMod implements ModInitializer {
                                         lives.put(t, lives.getOrDefault(t, 0) + amount);
 
                                         if (senderLives - amount <= 0 && oldPlayer.getOrDefault(s, false)) {
-                                            sender.server.getPlayerManager().ban(
-                                                    sender.getGameProfile(),
-                                                    "Out of lives",
-                                                    null,
-                                                    null
-                                            );
+                                            banPlayer(sender, "Out of lives");
                                         }
                                         return 1;
                                     }))))));
@@ -179,6 +164,16 @@ public class LivesSystemMod implements ModInitializer {
                             }))));
 
         });
+    }
+
+    /* ===== BAN METHOD (1.21 SAFE) ===== */
+    private static void banPlayer(ServerPlayerEntity player, String reason) {
+        var server = player.getServer();
+        if (server == null) return;
+
+        var banList = server.getPlayerManager().getUserBanList();
+        banList.add(player.getGameProfile(), null, reason, null);
+        player.networkHandler.disconnect(Text.of(reason));
     }
 }
 
