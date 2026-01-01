@@ -4,9 +4,10 @@ plugins {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
+
 
 group = 'com.example'
 version = '1.0.0'
