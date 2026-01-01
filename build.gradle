@@ -32,3 +32,9 @@ jar {
         rename { "${it}_${project.name}" }
     }
 }
+
+tasks.build {
+    dependsOn remapJar
+}
+
+}
