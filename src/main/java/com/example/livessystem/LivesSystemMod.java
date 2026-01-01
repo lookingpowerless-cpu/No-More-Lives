@@ -168,12 +168,22 @@ public class LivesSystemMod implements ModInitializer {
 
     /* ===== BAN METHOD (1.21 SAFE) ===== */
     private static void banPlayer(ServerPlayerEntity player, String reason) {
-        var server = player.getServer();
-        if (server == null) return;
+    var server = player.getServer();
+    if (server == null) return;
 
-        var banList = server.getPlayerManager().getUserBanList();
-        banList.add(player.getGameProfile(), null, reason, null);
-        player.networkHandler.disconnect(Text.of(reason));
-    }
+    var banList = server.getPlayerManager().getUserBanList();
+
+    banList.add(new net.minecraft.server.BannedPlayerEntry(
+            player.getGameProfile(),
+            null,
+            reason,
+            null,
+            null
+    ));
+
+    player.networkHandler.disconnect(Text.of(reason));
+}
+
+
 }
 
