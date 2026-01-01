@@ -1,11 +1,11 @@
 package com.example.livessystem;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IntegerArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -26,8 +26,9 @@ public class LivesSystemMod implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        /* ===== PLAYER JOIN ===== */
-        ServerPlayerEvents.JOIN.register(player -> {
+        /* ===== PLAYER JOIN (1.21 compatible) ===== */
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            ServerPlayerEntity player = handler.player;
             UUID id = player.getUuid();
 
             lives.putIfAbsent(id, 0);
@@ -41,7 +42,7 @@ public class LivesSystemMod implements ModInitializer {
             }
 
             if (oldPlayer.get(id) && lives.get(id) <= 0) {
-                player.server.getPlayerManager().ban(
+                server.getPlayerManager().ban(
                         player.getGameProfile(),
                         "Out of lives",
                         null,
@@ -124,14 +125,13 @@ public class LivesSystemMod implements ModInitializer {
 
                                 int diamondsNeeded = amount * DIAMONDS_PER_LIFE;
 
-                                if (!player.getInventory().count(net.minecraft.item.Items.DIAMOND).equals(diamondsNeeded)
-                                        && player.getInventory().count(net.minecraft.item.Items.DIAMOND) < diamondsNeeded) {
+                                if (player.getInventory().count(net.minecraft.item.Items.DIAMOND) < diamondsNeeded) {
                                     player.sendMessage(Text.of("§cNot enough resources"), false);
                                     return 0;
                                 }
 
-                                player.getInventory().remove(itemStack ->
-                                        itemStack.getItem() == net.minecraft.item.Items.DIAMOND,
+                                player.getInventory().remove(
+                                        stack -> stack.getItem() == net.minecraft.item.Items.DIAMOND,
                                         diamondsNeeded,
                                         player.playerScreenHandler.getCraftingInput()
                                 );
@@ -169,7 +169,8 @@ public class LivesSystemMod implements ModInitializer {
                             .executes(ctx -> {
                                 int amount = IntegerArgumentType.getInteger(ctx, "amount");
 
-                                for (ServerPlayerEntity p : ctx.getSource().getServer().getPlayerManager().getPlayerList()) {
+                                for (ServerPlayerEntity p : ctx.getSource().getServer()
+                                        .getPlayerManager().getPlayerList()) {
                                     UUID id = p.getUuid();
                                     lives.put(id, lives.getOrDefault(id, 0) + amount);
                                     p.sendMessage(Text.of("§aAdmin gave everyone " + amount + " lives"), false);
@@ -180,3 +181,4 @@ public class LivesSystemMod implements ModInitializer {
         });
     }
 }
+
