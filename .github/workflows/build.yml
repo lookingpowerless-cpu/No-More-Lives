@@ -18,7 +18,13 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Build with Gradle (no wrapper)
+      - name: Build with Gradle
         uses: gradle/gradle-build-action@v3
         with:
           arguments: build
+
+      - name: Upload mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: No-More-Lives
+          path: build/libs/*.jar
